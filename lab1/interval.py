@@ -2,71 +2,67 @@ import numpy as np
 
 
 class Interval:
-    def __init__(self, lower, upper):
-        if lower > upper:
+    def __init__(self, left, right):
+        if left > right:
             raise ValueError("Lower bound cannot be greater than upper bound.")
-        self.lower = lower
-        self.upper = upper
+        self.left = left
+        self.right = right
 
     def __repr__(self):
-        return f"[{self.lower}, {self.upper}]"
+        return f"[{self.left}, {self.right}]"
 
-    # Interval midpoint
     def mid(self):
-        return (self.lower + self.upper) / 2
+        return (self.left + self.right) / 2
 
-    # Interval width
     def width(self):
-        return self.upper - self.lower
+        return self.right - self.left
 
-    # Interval addition
+    def rad(self):
+        return (self.right - self.left) / 2
+
     def __add__(self, other):
         if isinstance(other, Interval):
-            return Interval(self.lower + other.lower, self.upper + other.upper)
-        return Interval(self.lower + other, self.upper + other)
+            return Interval(self.left + other.left, self.right + other.right)
+        return Interval(self.left + other, self.right + other)
 
-    # Subtracting intervals
     def __sub__(self, other):
         if isinstance(other, Interval):
-            return Interval(self.lower - other.upper, self.upper - other.lower)
-        return Interval(self.lower - other, self.upper - other)
+            return Interval(self.left - other.right, self.right - other.left)
+        return Interval(self.left - other, self.right - other)
 
-    # Interval multiplication
     def __mul__(self, other):
         if isinstance(other, Interval):
             products = np.array([
-                self.lower * other.lower,
-                self.lower * other.upper,
-                self.upper * other.lower,
-                self.upper * other.upper
+                self.left * other.left,
+                self.left * other.right,
+                self.right * other.left,
+                self.right * other.right
             ])
             return Interval(np.min(products), np.max(products))
-        return Interval(self.lower * other, self.upper * other)
+        return Interval(self.left * other, self.right * other)
 
-    # Interval division
     def __truediv__(self, other):
         if isinstance(other, Interval):
             divisions = np.array([
-                self.lower / other.lower,
-                self.lower / other.upper,
-                self.upper / other.lower,
-                self.upper / other.upper
+                self.left / other.left,
+                self.left / other.right,
+                self.right / other.left,
+                self.right / other.right
             ])
             return Interval(np.min(divisions), np.max(divisions))
-        return Interval(self.lower / other, self.upper / other)
+        return Interval(self.left / other, self.right / other)
 
-    # Belonging of a number to an interval
     def __contains__(self, value):
-        return self.lower <= value <= self.upper
+        return self.left <= value <= self.right
 
-    # Intersection of intervals
     def __and__(self, other):
-        new_lower = max(self.lower, other.lower)
-        new_upper = min(self.upper, other.upper)
-        if new_lower > new_upper:
+        new_left = max(self.left, other.left)
+        new_right = min(self.right, other.right)
+        if new_left > new_right:
             return Interval(0, 0)
-        return Interval(new_lower, new_upper)
+        return Interval(new_left, new_right)
 
-    # Combining intervals
     def __or__(self, other):
-        return Interval(min(self.lower, other.lower), max(self.upper, other.upper))
+        return Interval(
+            min(self.left, other.left), max(self.right, other.right)
+        )
