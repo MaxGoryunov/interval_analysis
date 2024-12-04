@@ -9,7 +9,7 @@ class Interval:
         self.right = right
 
     def __repr__(self):
-        return f"[{self.left:.4f}, {self.right:.4f}]"
+        return f"[{self.left:.4e}, {self.right:.4e}]"
 
     def mid(self):
         return (self.left + self.right) / 2
