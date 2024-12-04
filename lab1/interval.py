@@ -9,7 +9,7 @@ class Interval:
         self.right = right
 
     def __repr__(self):
-        return f"[{self.left}, {self.right}]"
+        return f"[{self.left:.4f}, {self.right:.4f}]"
 
     def mid(self):
         return (self.left + self.right) / 2
@@ -41,7 +41,7 @@ class Interval:
             return Interval(np.min(products), np.max(products))
         return Interval(self.left * other, self.right * other)
 
-    def __truediv__(self, other):
+    def __div__(self, other):
         if isinstance(other, Interval):
             divisions = np.array([
                 self.left / other.left,
