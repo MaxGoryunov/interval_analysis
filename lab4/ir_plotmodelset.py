@@ -1,12 +1,55 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import linprog
-# from data_corr import plot_tol_sys
+from scaler import SCALE
+
+# SCALE = 1/16384
 
 
+def local_print_intervals(ys_int, ys_ext, Xs_lvls, actually_draw=True):
+    ys_int = ys_int * (SCALE) - 0.5
+    ys_ext = ys_ext * (SCALE) - 0.5
+    ys_int_to_plot = [np.average(i) for i in ys_int]
+    ys_ext_to_plot = [np.average(i) for i in ys_ext]
+    print(f'ys_int = ', ys_int)
 
-def ir_plotmodelset(irproblems, xlimits=None):
-    colors = ["#EF476F", "#F78C6B", "#FFD166", "#83D483", "#06D6A0", "#0CB0A9", "#118AB2", "#073B4C"]
+    def gen_yi1(ys_int_to_plot):
+        return np.abs(ys_int[:, 0] - ys_int_to_plot)
+
+    def gen_yi2(ys_int_to_plot):
+        return np.abs(ys_int[:, 1] - ys_int_to_plot)
+
+    def gen_ye1(ys_ext_to_plot):
+        return np.abs(ys_ext[:, 0] - ys_ext_to_plot)
+
+    def gen_ye2(ys_ext_to_plot):
+        return np.abs(ys_ext[:, 1] - ys_ext_to_plot)
+
+    yerr_int = [
+        gen_yi1(ys_int_to_plot),
+        gen_yi2(ys_int_to_plot)
+    ]
+    yerr_ext = [
+        gen_ye1(ys_ext_to_plot),
+        gen_ye2(ys_ext_to_plot)
+    ]
+    
+    if actually_draw:
+        plt.title('Оценки')
+        plt.errorbar(Xs_lvls, ys_int_to_plot, yerr=yerr_int, marker=".", linestyle='none',
+                    ecolor='k', elinewidth=0.8, capsize=4, capthick=1)
+        plt.errorbar(Xs_lvls, ys_ext_to_plot, yerr=yerr_ext, linestyle='none',
+                    ecolor='r', elinewidth=0.8, capsize=4, capthick=1)
+        plt.show()
+    else:
+        plt.errorbar(Xs_lvls, ys_int_to_plot, yerr=yerr_int, marker=".", linestyle='none',
+                    ecolor='k', elinewidth=0.8, capsize=4, capthick=1)
+        plt.errorbar(Xs_lvls, ys_ext_to_plot, yerr=yerr_ext, linestyle='none',
+                    ecolor='r', elinewidth=0.8, capsize=4, capthick=1)
+
+
+def ir_plotmodelset(irproblems, xlimits=None, ys_int=None, ys_ext=None, Xs_lvls=None):
+    colors = ["blue", "#6bf7d2", "#6bf7d2", "#d48383", "#06a4d6", "#0c65b0", "#113ab2", "#07194c"]
     colors.reverse()
     if len(irproblems) > len(colors):
         raise ValueError(f"Max len of irproblems is {len(colors)}")
@@ -48,11 +91,12 @@ def ir_plotmodelset(irproblems, xlimits=None):
         plt.fill(px, py, color=colors[i], alpha=0.5)
         plt.plot(x, yp[:, 0], color=colors[i], linewidth=1)
         plt.plot(x, yp[:, 1], color=colors[i], linewidth=1)
-
+    if ys_int is not None:
+        local_print_intervals(ys_int, ys_ext, Xs_lvls, actually_draw=False)
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.title('IR Model Set Plot')
-    # plt.show()
+    plt.show()
 
 
 def ir_predict(irproblem, Xp):

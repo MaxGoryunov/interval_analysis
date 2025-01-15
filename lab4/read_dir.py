@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-PATH = '27_08_2024ADC_rawData'
+PATH = 'rawData'
 
 
 class Frame:
@@ -47,7 +47,9 @@ class Bin:
 
 class rawData:
     def __init__(self, path: str, calibrate=False):
-        self.file_dir = Path(path).glob('*.bin')
+        print('path = ', Path(path).absolute())
+        self.file_dir = Path(path).absolute().glob('*.bin')
+        print('dir = ', self.file_dir)
         self.bins = []
         self.lvls = []
         if "ADC" in path:
@@ -55,9 +57,12 @@ class rawData:
         else:
             self.date = "None"
         self.calibrate_flag = calibrate
+        print('finish ctor')
 
     def file_lvl(self, file):
-        filename = file.__str__().split("\\")[1]
+        print('in file lvl')
+        filename = file.__str__().split("\\")[-1]
+        print(f'file name = {file.__str__()}')
         if not self.calibrate_flag:
             if "lvl" in filename:
                 lvl = [float(filename.split("_lvl")[0])]
@@ -88,22 +93,24 @@ class rawData:
 
     def read_directory(self):
         headers_info = []
-
+        print('reading directory')
         for file in self.file_dir:
+            print('here')
             bin_file = Bin(self.file_lvl(file))
+            print('here 2')
             bin_file.file_frames(file)
             self.bins.append(bin_file)
             self.lvls.append(bin_file.lvl)
 
             headers_info.append([[bin_file.lvl, bin_file.last], [bin_file.side, bin_file.mode, bin_file.frame_count]])
-
+        print(f'headers info = {headers_info}')
         return headers_info
 
     def hist_bin_by_lvl_frame_channel(self, lvl: float, frame: int, channel: int, last=False):
         bin_file = self.get_bin_by_lvl(lvl, last)
         if bin_file:
             plt.hist(np.array(bin_file.frames[frame])[:, channel],
-                     edgecolor="cornflowerblue",
+                     edgecolor="#074c3a",
                      bins=1024,
                      density=True)
             plt.title(f"lvl: {lvl}, frame: {frame}, channel: {channel + 1}")
@@ -115,7 +122,7 @@ class rawData:
         bin_file = self.get_bin_by_lvl(lvl, last)
         if bin_file:
             plt.plot(np.array(bin_file.frames[frame])[:, channel],
-                     color="royalblue")
+                     color="#074c3a")
             plt.title(f"lvl: {lvl}, frame: {frame}, channel: {channel+1}")
             plt.show()
         else:
@@ -127,7 +134,7 @@ class rawData:
             for channel in range(0, 8):
                 plt.subplot(2, 4, channel + 1)
                 plt.hist(np.array(bin_file.frames[frame])[:, channel],
-                         edgecolor="cornflowerblue",
+                         edgecolor="#074c3a",
                          bins=1024,
                          density=True)
                 plt.title(f"{lvl, frame, channel + 1}")
@@ -142,13 +149,13 @@ class rawData:
                 for channel in range(0, 8):
                     plt.subplot(2, 4, channel + 1)
                     plt.plot(np.array(bin_file.frames[frame])[:, channel],
-                             color="royalblue")
+                             color="#074c3a")
                     plt.title(f"{lvl, frame, channel + 1}")
                 plt.show()
             else:
-                colors = ["cyan", "deepskyblue", "teal", "darkslateblue",
-                          "midnightblue", "indigo", "slategray", "turquoise"]
-                # colors = ["#EF476F", "#F78C6B", "#FFD166", "#83D483", "#06D6A0", "#0CB0A9", "#118AB2", "#073B4C"]
+                colors = ["#010605", "#031d16", "#053528", "#074c3a",
+                          "#09634c", "#0b7b5e", "#0d926f", "#0fa981"]
+
                 for channel in range(0, 8):
                     plt.plot(np.array(self.get_bin_by_lvl(lvl).frames[frame])[:, channel],
                              color=colors[channel], label=f"channel {channel + 1}", alpha=0.8)
@@ -161,3 +168,6 @@ class rawData:
 
 rawData_instance = rawData(PATH)
 rawData_instance.read_directory()
+rawData_instance.plot_bin_by_lvl_frame_all_bins(-0.205, 1)
+rawData_instance.plot_bin_by_lvl_frame_all_bins(-0.205, 1, False)
+
