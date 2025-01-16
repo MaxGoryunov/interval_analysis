@@ -136,7 +136,7 @@ def calibrate(ch, cells, graphics=False):
 
 
 if __name__ == "__main__":
-    b_int, b_out = calibrate(7, 1000, True)
+    b_int, b_out = calibrate(1, 2, True)
 
 
 

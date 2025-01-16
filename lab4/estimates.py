@@ -112,9 +112,12 @@ def calibration_data_all_bins(ch, cells, type: str, data, print_flag=False):
         match type:
             case "Ext":
                 yarray.append(calibration_data_ext(ynow))
+                print(f'ext yarr = {yarray}')
             case "Ext2":
                 yarray.append(calibration_data_ext2(ynow))
+                print(f'ext2 yarr = {yarray}')
             case "Int":
                 yarray.append(calibration_data_int(ynow, fn.frame_count))
+                print(f'int yarr = {yarray}')
     return np.array(yarray)
 
